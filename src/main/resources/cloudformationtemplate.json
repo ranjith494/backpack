@@ -1,0 +1,460 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Amazon ECS Preview Quickstart Template",
+  "Parameters": {
+    "ClusterName": {
+      "Description": "Name of your Amazon ECS Cluster",
+      "Type": "String",
+      "ConstraintDescription": "must be a valid Amazon ECS Cluster.",
+      "Default": "default"
+    },
+    "KeyName": {
+      "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "Default": "test",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+    "InstanceType": {
+      "Description": "Container Instance type",
+      "Type": "String",
+      "Default": "t2.micro",
+      "AllowedValues": [
+        "t2.micro",
+        "t2.small",
+        "t2.medium",
+        "m3.medium",
+        "m3.large",
+        "m3.xlarge",
+        "m3.2xlarge",
+        "c3.large",
+        "c3.xlarge",
+        "c3.2xlarge",
+        "c3.4xlarge",
+        "c3.8xlarge",
+        "r3.large",
+        "r3.xlarge",
+        "r3.2xlarge",
+        "r3.4xlarge",
+        "r3.8xlarge",
+        "i2.xlarge",
+        "i2.2xlarge",
+        "i2.4xlarge",
+        "i2.8xlarge",
+        "hi1.4xlarge",
+        "hs1.8xlarge",
+        "cr1.8xlarge",
+        "cc2.8xlarge"
+      ],
+      "ConstraintDescription": "must be a valid EC2 instance type."
+    },
+    "SSHLocation": {
+      "Description": " The IP address range that can be used to SSH to the EC2 instances",
+      "Type": "String",
+      "MinLength": "9",
+      "MaxLength": "18",
+      "Default": "0.0.0.0/0",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    }
+  },
+  "Mappings": {
+    "AWSInstanceType2Arch": {
+      "t2.micro": {
+        "Arch": "HVM64"
+      },
+      "t2.small": {
+        "Arch": "HVM64"
+      },
+      "t2.medium": {
+        "Arch": "HVM64"
+      },
+      "m3.medium": {
+        "Arch": "HVM64"
+      },
+      "m3.large": {
+        "Arch": "HVM64"
+      },
+      "m3.xlarge": {
+        "Arch": "HVM64"
+      },
+      "m3.2xlarge": {
+        "Arch": "HVM64"
+      },
+      "c3.large": {
+        "Arch": "HVM64"
+      },
+      "c3.xlarge": {
+        "Arch": "HVM64"
+      },
+      "c3.2xlarge": {
+        "Arch": "HVM64"
+      },
+      "c3.4xlarge": {
+        "Arch": "HVM64"
+      },
+      "c3.8xlarge": {
+        "Arch": "HVM64"
+      },
+      "r3.large": {
+        "Arch": "HVM64"
+      },
+      "r3.xlarge": {
+        "Arch": "HVM64"
+      },
+      "r3.2xlarge": {
+        "Arch": "HVM64"
+      },
+      "r3.4xlarge": {
+        "Arch": "HVM64"
+      },
+      "r3.8xlarge": {
+        "Arch": "HVM64"
+      },
+      "i2.xlarge": {
+        "Arch": "HVM64"
+      },
+      "i2.2xlarge": {
+        "Arch": "HVM64"
+      },
+      "i2.4xlarge": {
+        "Arch": "HVM64"
+      },
+      "i2.8xlarge": {
+        "Arch": "HVM64"
+      },
+      "hi1.4xlarge": {
+        "Arch": "HVM64"
+      },
+      "hs1.8xlarge": {
+        "Arch": "HVM64"
+      },
+      "cr1.8xlarge": {
+        "Arch": "HVM64"
+      },
+      "cc2.8xlarge": {
+        "Arch": "HVM64"
+      }
+    },
+    "AWSRegionArch2AMI": {
+      "us-east-1": {
+        "HVM64": "ami-c16422a4"
+      }
+    }
+  },
+  "Resources": {
+    "taskdefinition": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Memory": 300,
+            "PortMappings": [
+              {
+                "HostPort": 80,
+                "ContainerPort": 80
+              },
+              {
+                "HostPort": 4444,
+                "ContainerPort": 4444
+              }
+            ],
+            "MountPoints": [
+              {
+                "ContainerPath": "/opt/tests",
+                "SourceVolume": "my-vol"
+              }
+            ],
+            "Essential": true,
+            "Name": "selenium-chrome-vnc-container",
+            "Image": "geetharam/selenium-chrome-vnc",
+            "Cpu": 10
+          },
+          {
+            "Name": "protractor-tests",
+            "Image": "geetharam/protractor_tests",
+            "Memory": "500",
+            "Cpu": "10",
+            "Essential": true,
+            "Links": [
+              "selenium-chrome-vnc-container"
+            ],
+            "MountPoints": [
+              {
+                "ContainerPath": "/opt/tests",
+                "SourceVolume": "my-vol"
+              }
+            ]
+          }
+        ],
+        "Volumes": [
+          {
+            "Host": {
+              "SourcePath": "/home/ec2-user"
+            },
+            "Name": "my-vol"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "cf4e562c-f9c3-4d16-ba2f-a8a38880d7da"
+        }
+      }
+    },
+    "ContainerInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "IamInstanceProfile": {
+          "Ref": "ECSIamInstanceProfile"
+        },
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AWSRegionArch2AMI",
+            {
+              "Ref": "AWS::Region"
+            },
+            {
+              "Fn::FindInMap": [
+                "AWSInstanceType2Arch",
+                {
+                  "Ref": "InstanceType"
+                },
+                "Arch"
+              ]
+            }
+          ]
+        },
+        "InstanceType": {
+          "Ref": "InstanceType"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "ECSQuickstartSecurityGroup"
+          }
+        ],
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -xe\n",
+                "echo ECS_CLUSTER=",
+                {
+                  "Ref": "ClusterName"
+                },
+                " >> /etc/ecs/ecs.config\n"
+              ]
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "8e9fe12e-c8cf-44f6-96bb-f3af9b422841"
+        }
+      }
+    },
+    "service": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "DesiredCount": "1",
+        "TaskDefinition": {
+          "Ref": "taskdefinition"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "b1f372a2-1ee8-4a7b-85fa-b564776ce42a"
+        }
+      }
+    },
+    "ECSQuickstartSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTP access via SSH",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": {
+              "Ref": "SSHLocation"
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "96868015-99ce-4281-9eac-c3845cb1aa3d"
+        }
+      }
+    },
+    "ECSIamInstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "ECSQuickstartRole"
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "95177111-cc43-4891-a6a0-cb84b4044087"
+        }
+      }
+    },
+    "ECSQuickstartRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "ec2.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "ECSQuickstart",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "ecs:*",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "b7883b43-9d8c-4be4-a5e4-646b14d2dbdb"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ECSInstance": {
+      "Description": "Location for Amazon ECS Instance",
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "ssh ec2-user@",
+            {
+              "Fn::GetAtt": [
+                "ContainerInstance",
+                "PublicDnsName"
+              ]
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "b7883b43-9d8c-4be4-a5e4-646b14d2dbdb": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "95177111-cc43-4891-a6a0-cb84b4044087": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 180,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "b7883b43-9d8c-4be4-a5e4-646b14d2dbdb"
+        ]
+      },
+      "96868015-99ce-4281-9eac-c3845cb1aa3d": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "8e9fe12e-c8cf-44f6-96bb-f3af9b422841": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 180,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": [],
+        "ismemberof": [
+          "96868015-99ce-4281-9eac-c3845cb1aa3d"
+        ],
+        "isrelatedto": [
+          "95177111-cc43-4891-a6a0-cb84b4044087"
+        ]
+      },
+      "cf4e562c-f9c3-4d16-ba2f-a8a38880d7da": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "b1f372a2-1ee8-4a7b-85fa-b564776ce42a": {
+        "size": {
+          "height": 60
+        },
+        "position": {
+          "x": 270,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": [],
+        "references": [
+          "cf4e562c-f9c3-4d16-ba2f-a8a38880d7da"
+        ]
+      }
+    }
+  }
+}
