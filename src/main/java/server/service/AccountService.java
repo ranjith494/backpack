@@ -15,6 +15,7 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -22,7 +23,9 @@ import javax.ws.rs.core.MediaType;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
@@ -30,6 +33,7 @@ import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import com.aws.ec2.LaunchECSCloudFormationStack;
 
 import server.obj.Account;
 
@@ -39,8 +43,8 @@ import server.obj.Account;
 public class AccountService {
 
 	Map<String, Account> accounts = new HashMap<String, Account>();
-	private static String bucketName = "ranjith.kethapally";
-
+	private static String bucketName = "backpack-trail";
+	
 	public void init() {
 
 		Account newAccount1 = new Account();
@@ -76,7 +80,25 @@ public class AccountService {
 		}
 		return accountList;
 	}
-	
+	@POST
+	@Path("/backpack/createStack")
+	public String createStack(String jsonTemplate) throws Exception{
+		AWSCredentials credentials = LaunchECSCloudFormationStack.loadCredentials();
+		LaunchECSCloudFormationStack launcher=new LaunchECSCloudFormationStack(new AmazonCloudFormationClient(credentials));
+    	launcher.createStack(jsonTemplate);
+    	//launcher.deleteStack();
+		return "SUCCESS";
+		
+	}
+	@GET
+	@Path("/backpack/deleteStack")
+	public String deleteStack() throws Exception{
+		AWSCredentials credentials = LaunchECSCloudFormationStack.loadCredentials();
+		LaunchECSCloudFormationStack launcher=new LaunchECSCloudFormationStack(new AmazonCloudFormationClient(credentials));
+    	launcher.createStack();
+		return "SUCCESS";
+		
+	}
 	@GET
 	@Path("/backpack/logs")
 	@Produces("application/json")
@@ -90,7 +112,7 @@ public class AccountService {
         try {
             while(true) {
             	System.out.println("Thread sleeping for 10 Secs. Loop: "+count);
-    			Thread.sleep(10000);
+    			Thread.sleep(5000);
     			count++;
     			objectListing = s3Client.listObjects(listObjectsRequest);
     			objectList = objectListing.getObjectSummaries();

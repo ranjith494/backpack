@@ -22,18 +22,37 @@
    <body>
       <h2>AngularJS Sample Application</h2>
       <div ng-app = "" ng-controller = "studentController">
-      <button ng-click="callService">
+      <button ng-click="callService()">
       Load
       </button>
       {{ links}}
+      <table class="table table-bordered table-hover table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>File Name</th>
+                                                    <th>Size</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat=" file in links">
+                                                    <td>1</td>
+                                                    <td>Log 1</td>
+                                                    <td>10 kb</td>
+                                                    <td><a href="{file}">view</a></td>
+                                                </tr>
+                                               
+                                            </tbody>
+                                        </table>
       </div>
       
       <script>
          function studentController($scope,$http) {
-            var url = "http://localhost:8080/BackPack/services/rservice/accountservice/backpack/logs";
-         	$scope.links = []
+            $scope.url = "http://localhost:8080/BackPack/services/rservice/accountservice/backpack/logs";
+         	$scope.links = [];
          	$scope.callService = function(){
-            	$http.get(url).success( function(response) {
+            	$http.get($scope.url).success( function(response) {
                		$scope.links = response;
             	});
          		
