@@ -164,7 +164,7 @@ Go to <a href="pages/index.html">/pages/index.html</a>
 						</div>
 						<!-- /.panel-heading -->
 						<div class="panel-body">
-							<span ng-if="files.length != 0""> <a href="http://localhost:9000/">Code
+							<span ng-if="files.length != 0""> <a href="http://localhost:9000/dashboard/index/1">Code
 									Analysis</a>
 							</span>
 						</div>
@@ -188,9 +188,9 @@ Go to <a href="pages/index.html">/pages/index.html</a>
 	<script src="bower_components/jquery/dist/jquery.min.js"></script>
 	<script>
 		function studentController($scope, $http) {
-			$scope.createStackUrl = "http://localhost:8080/BackPack/services/rservice/accountservice/backpack/createStack";
-			$scope.deleteStackUrl = "http://localhost:8080/BackPack/services/rservice/accountservice/backpack/deleteStack";
-			$scope.url = "http://localhost:8080/BackPack/services/rservice/accountservice/backpack/logs";
+			$scope.createStackUrl = "/BackPack/services/rservice/accountservice/backpack/createStack";
+			$scope.deleteStackUrl = "/BackPack/services/rservice/accountservice/backpack/deleteStack";
+			$scope.url = "/BackPack/services/rservice/accountservice/backpack/logs";
 			$scope.files = [];
 			$scope.processTask = '';
 			$scope.showLoadingIndicator = false;
