@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	<welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.htm</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+    <welcome-file>default.html</welcome-file>
+    <welcome-file>default.htm</welcome-file>
+    <welcome-file>default.jsp</welcome-file>
+  </welcome-file-list>
+  <display-name>Archetype Created Web Application</display-name>
+  
+  <listener>
+  	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+  
+  <context-param>
+  	<param-name>contextConfigLocation</param-name>
+  	<param-value>WEB-INF/rest-servlet.xml</param-value>
+  </context-param>
+  
+  <servlet>
+  	<servlet-name>CXFServlet</servlet-name>
+  	<servlet-class>org.apache.cxf.transport.servlet.CXFServlet</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+  	<servlet-name>CXFServlet</servlet-name>
+  	<url-pattern>/services/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet>
+    <description></description>
+    <display-name>DownloadFilesS3</display-name>
+    <servlet-name>DownloadFilesS3</servlet-name>
+    <servlet-class>com.cdhacks.DownloadFilesS3</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DownloadFilesS3</servlet-name>
+    <url-pattern>/DownloadFilesS3</url-pattern>
+  </servlet-mapping>
+  
+</web-app>
