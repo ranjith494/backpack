@@ -95,7 +95,7 @@ public class AccountService {
 	public String deleteStack() throws Exception{
 		AWSCredentials credentials = LaunchECSCloudFormationStack.loadCredentials();
 		LaunchECSCloudFormationStack launcher=new LaunchECSCloudFormationStack(new AmazonCloudFormationClient(credentials));
-    	launcher.createStack();
+    	launcher.deleteStack();
 		return "SUCCESS";
 		
 	}
